@@ -54,15 +54,24 @@ def adjust_waypoint_altitudes(conn):
         logging.error(str(e))
         continue
 
+      old_rel_altitude = point_dict['height']
+
       abs_home_elevation_m = abs_home_elevation_m or abs_elevation_m
-      new_rel_altitude_m = (
+      new_rel_altitude_m = round(
         abs_elevation_m - abs_home_elevation_m + settings.ALTITUDE_M
       )
 
-      logging.info(
-        'Adjusting altitude. new_altitude_m={:04}'.format(new_rel_altitude_m)
-      )
-      point_dict['height'] = new_rel_altitude_m
+      if new_rel_altitude_m == old_rel_altitude:
+        logging.info(
+          'Altitude already adjusted. altitude_m={:04}'.format(new_rel_altitude_m)
+        )
+      else:
+        logging.info(
+          'Adjusting altitude. old_altitude_m={:04} new_altitude_m={:04}'.format(
+            old_rel_altitude, new_rel_altitude_m
+          )
+        )
+        point_dict['height'] = new_rel_altitude_m
 
     cursor.execute(
       'update dji_pilot_dji_groundstation_controller_DataMgr_DJIWPCollectionItem '
@@ -103,7 +112,7 @@ def get_elevation_with_resolution(lat_float, lng_float):
         elevation_dict['error_message']
       )
     )
-  elevation_m = round(elevation_dict['results'][0]['elevation'])
+  elevation_m = elevation_dict['results'][0]['elevation']
   resolution_m = elevation_dict['results'][0]['resolution']
   if resolution_m > settings.WARN_RESOLUTION:
     logging.warning(
