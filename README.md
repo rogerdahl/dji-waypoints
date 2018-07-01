@@ -1,6 +1,6 @@
 ## Automatically adjust the altitude of waypoints in DJI GO Mod to match the terrain
 
-This script connects to the waypoints database in DJI Go Mod and, for each waypoint, looks up the elevation for the GPS position using the Google Elevations API, adds a configurable altitude value to the elevation and writes the new altitudes back to the waypoint.
+This script connects to the waypoints database in DJI Go Mod and, for each waypoint, looks up the elevation for the GPS position using the Google Elevations service, adds a configurable altitude value to the elevation and writes the new altitudes back to the waypoint.
 
 The goal is to keep the drone at a fairly constant altitude in hilly terrain.
 
@@ -9,14 +9,14 @@ The goal is to keep the drone at a fairly constant altitude in hilly terrain.
 
 * This works for me but might crash your drone
 
-* Requires that you obtain an API key from Google in order to access the Google Elevation API. It is very unlikely that you will exceed their free usage tier, but you will still need to register a payment method, such as a credit card, or bank account with Google.
+* Requires that you obtain an API key from Google in order to access the Google Elevation service. It is very unlikely that you will exceed their free usage tier, but you will still need to register a payment method, such as a credit card, or bank account with Google.
 
 * Works only with the hacked version of DJI Go, called DJI Go Mod
 
 * Works only on Linux, due to dependency on `go-mtpfs`
 
 
-### Setup
+### Linux Setup
 
 * Install `go-mtpfs`
   * `$ apt install go-mtpfs`
@@ -30,27 +30,27 @@ The goal is to keep the drone at a fairly constant altitude in hilly terrain.
   * `$ . ./venv/bin/activate`
   * `$ pip install requests`
 
-* Obtain a API key from Google for the Elevation API
+* Obtain a API key from Google for the Elevation service
   * https://developers.google.com/maps/documentation/elevation/get-api-key
 
 * Prepare and edit the settings
   * `$ cp settings_sample.py settings.py`
   * Edit `settings.py`
-    * Insert your API key
+    * Replace the API key placeholder with your Google API key
     * Check and adjust `ALTITUDE_M`
-      * I recommend using high altitudes while testing the adjusted waypoints
+      * To reduce the chance of a crash, starting out with a higher altitude than you think you need is probably a good idea
 
 
 ### Usage
 
 * On an Android device that has DJI Go Mod installed, set the USB configuration to MTP (Media Transfer Protocol)
 
-* Connect the device to the Linux box via USB
+* Connect the Android device to the Linux box via USB
 
 * Run `./adjust_waypoint_altitude.py`
 
 
-### Workflow
+### Example workflow
 
 * Create mission on the PC while leaving waypoint altitudes at the default value
   * https://mission.3d-log.com/

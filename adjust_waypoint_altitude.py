@@ -34,12 +34,10 @@ def adjust_waypoint_altitudes(conn):
     logging.info('Mission: {}\n'.format(mission_dict['location']))
 
     points_dict = json.loads(mission_dict['pointsJsonStr'])
-
     abs_home_elevation_m = None
 
     for point_idx, point_dict in enumerate(points_dict['points']):
       lat_float, lng_float = point_dict['lat'], point_dict['lng']
-
       logging.info(
         'waypoint={:03} lat={:03.15} lng={:03.15}:'.format(
           point_idx + 1, lat_float, lng_float
@@ -50,12 +48,11 @@ def adjust_waypoint_altitudes(conn):
         abs_elevation_m, resolution_m = get_elevation_with_resolution(
           lat_float, lng_float
         )
-      except WaypointAdjusterExeption as e:
+      except WaypointAdjusterException as e:
         logging.error(str(e))
         continue
 
       old_rel_altitude = point_dict['height']
-
       abs_home_elevation_m = abs_home_elevation_m or abs_elevation_m
       new_rel_altitude_m = round(
         abs_elevation_m - abs_home_elevation_m + settings.ALTITUDE_M
@@ -88,7 +85,7 @@ def sqlite_connection(mount_dir_path):
   try:
     conn = sqlite3.connect(db_path)
   except sqlite3.OperationalError as e:
-    raise WaypointAdjusterExeption(
+    raise WaypointAdjusterException(
       'error="{}" path="{}"'.format(str(e), db_path)
     )
   conn.row_factory = dict_factory
@@ -107,7 +104,7 @@ def get_elevation_with_resolution(lat_float, lng_float):
   )
   elevation_dict = response.json()
   if elevation_dict['status'] != 'OK':
-    raise WaypointAdjusterExeption(
+    raise WaypointAdjusterException(
       'Unable to query elevation. error="{}"'.format(
         elevation_dict['error_message']
       )
@@ -139,13 +136,13 @@ def mount_mtp(mount_dir_path):
   try:
     fuse_proc = subprocess.Popen(settings.MOUNT_CMD_LIST + [mount_dir_path])
   except subprocess.CalledProcessError as e:
-    raise WaypointAdjusterExeption(str(e))
+    raise WaypointAdjusterException(str(e))
   for i in range(10):
     if os.path.ismount(mount_dir_path):
       return fuse_proc
     logging.info('Waiting for MTP mount...')
     time.sleep(1)
-  raise WaypointAdjusterExeption('MTP mount timed out')
+  raise WaypointAdjusterException('MTP mount timed out')
 
 
 def umount_mtp(fuse_proc, mount_dir_path):
@@ -153,7 +150,7 @@ def umount_mtp(fuse_proc, mount_dir_path):
     try:
       subprocess.check_call(settings.UMOUNT_CMD_LIST + [mount_dir_path])
     except subprocess.CalledProcessError as e:
-      logging.error(WaypointAdjusterExeption(str(e)))
+      logging.error(WaypointAdjusterException(str(e)))
       time.sleep(1)
       continue
     if not os.path.ismount(mount_dir_path):
@@ -170,7 +167,7 @@ def dict_factory(cursor, row):
   return d
 
 
-class WaypointAdjusterExeption(Exception):
+class WaypointAdjusterException(Exception):
   pass
 
 
