@@ -1,4 +1,4 @@
-## Automatically adjust the altitude of waypoints in DJI GO Mod to match the terrain
+## Automatically adjust the altitude of waypoints in DJI GO Mod to follow the terrain
 
 This script connects to the waypoints database in DJI Go Mod and, for each waypoint, looks up the elevation for the GPS position using the Google Elevations service, adds a configurable altitude value to the elevation and writes the new altitudes back to the waypoint.
 
